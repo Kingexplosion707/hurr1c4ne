@@ -114,7 +114,18 @@
                                    size:13
                                   color:[self mutedColor]
                                  weight:UIFontWeightBold];
-    name.letterSpacing = 1.2;
+
+    // UILabel has no letterSpacing property.
+    // NSKernAttributeName applies letter spacing correctly.
+    NSMutableAttributedString *styledName =
+        [[NSMutableAttributedString alloc]
+            initWithString:title.uppercaseString];
+
+    [styledName addAttribute:NSKernAttributeName
+                       value:@1.2
+                       range:NSMakeRange(0, styledName.length)];
+
+    name.attributedText = styledName;
 
     [heading addArrangedSubview:icon];
     [heading addArrangedSubview:name];
@@ -124,8 +135,8 @@
 
 - (void)addCard:(UIView *)card
           toView:(UIView *)parent
-        topAnchor:(NSLayoutYAxisAnchor *)topAnchor
-          spacing:(CGFloat)spacing {
+       topAnchor:(NSLayoutYAxisAnchor *)topAnchor
+         spacing:(CGFloat)spacing {
     [parent addSubview:card];
 
     [NSLayoutConstraint activateConstraints:@[
@@ -205,7 +216,8 @@
 
     UIView *logo = [[UIView alloc] init];
     logo.translatesAutoresizingMaskIntoConstraints = NO;
-    logo.backgroundColor = [UIColor colorWithRed:0.20 green:0.09 blue:0.40 alpha:1.0];
+    logo.backgroundColor =
+        [UIColor colorWithRed:0.20 green:0.09 blue:0.40 alpha:1.0];
     logo.layer.cornerRadius = 19;
     logo.layer.borderWidth = 1;
     logo.layer.borderColor = [self purpleColor].CGColor;
@@ -242,18 +254,21 @@
     title.attributedText = styledTitle;
     [branding addArrangedSubview:title];
 
-    UILabel *subtitle = [self labelWithText:@"iOS / iPadOS RESEARCH"
+    NSString *subtitleText = @"iOS / iPadOS RESEARCH";
+
+    UILabel *subtitle = [self labelWithText:subtitleText
                                        size:10
                                       color:[self mutedColor]
                                      weight:UIFontWeightBold];
-    subtitle.attributedText = ({
-        NSMutableAttributedString *s =
-            [[NSMutableAttributedString alloc] initWithString:@"iOS / iPadOS RESEARCH"];
-        [s addAttribute:NSKernAttributeName
-                  value:@2.0
-                  range:NSMakeRange(0, s.length)];
-        s;
-    });
+
+    NSMutableAttributedString *styledSubtitle =
+        [[NSMutableAttributedString alloc] initWithString:subtitleText];
+
+    [styledSubtitle addAttribute:NSKernAttributeName
+                           value:@2.0
+                           range:NSMakeRange(0, styledSubtitle.length)];
+
+    subtitle.attributedText = styledSubtitle;
 
     [branding addArrangedSubview:subtitle];
 
@@ -298,13 +313,14 @@
         [stack.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-19]
     ]];
 
-    [stack addArrangedSubview:[self sectionHeading:@"▣" title:@"Device information"]];
+    [stack addArrangedSubview:
+        [self sectionHeading:@"▣" title:@"Device information"]];
 
     UIView *divider = [[UIView alloc] init];
     divider.translatesAutoresizingMaskIntoConstraints = NO;
     divider.backgroundColor = [UIColor colorWithWhite:1 alpha:0.08];
-    [divider.heightAnchor constraintEqualToConstant:1].active = YES;
 
+    [divider.heightAnchor constraintEqualToConstant:1].active = YES;
     [stack addArrangedSubview:divider];
 
     UIStackView *details = [[UIStackView alloc] init];
@@ -318,18 +334,48 @@
     UIStackView *osColumn = [self verticalStackWithSpacing:7];
     UIStackView *buildColumn = [self verticalStackWithSpacing:7];
 
-    [modelColumn addArrangedSubview:[self labelWithText:@"MODEL" size:10 color:[self mutedColor] weight:UIFontWeightBold]];
-    self.deviceModelLabel = [self labelWithText:@"Detecting…" size:15 color:UIColor.whiteColor weight:UIFontWeightBold];
+    [modelColumn addArrangedSubview:
+        [self labelWithText:@"MODEL"
+                       size:10
+                      color:[self mutedColor]
+                     weight:UIFontWeightBold]];
+
+    self.deviceModelLabel =
+        [self labelWithText:@"Detecting…"
+                       size:15
+                      color:UIColor.whiteColor
+                     weight:UIFontWeightBold];
+
     self.deviceModelLabel.adjustsFontSizeToFitWidth = YES;
     self.deviceModelLabel.minimumScaleFactor = 0.75;
     [modelColumn addArrangedSubview:self.deviceModelLabel];
 
-    [osColumn addArrangedSubview:[self labelWithText:@"iOS VERSION" size:10 color:[self mutedColor] weight:UIFontWeightBold]];
-    self.osVersionLabel = [self labelWithText:@"Detecting…" size:15 color:UIColor.whiteColor weight:UIFontWeightBold];
+    [osColumn addArrangedSubview:
+        [self labelWithText:@"iOS VERSION"
+                       size:10
+                      color:[self mutedColor]
+                     weight:UIFontWeightBold]];
+
+    self.osVersionLabel =
+        [self labelWithText:@"Detecting…"
+                       size:15
+                      color:UIColor.whiteColor
+                     weight:UIFontWeightBold];
+
     [osColumn addArrangedSubview:self.osVersionLabel];
 
-    [buildColumn addArrangedSubview:[self labelWithText:@"BUILD" size:10 color:[self mutedColor] weight:UIFontWeightBold]];
-    self.buildLabel = [self labelWithText:@"Detecting…" size:13 color:UIColor.whiteColor weight:UIFontWeightMedium];
+    [buildColumn addArrangedSubview:
+        [self labelWithText:@"BUILD"
+                       size:10
+                      color:[self mutedColor]
+                     weight:UIFontWeightBold]];
+
+    self.buildLabel =
+        [self labelWithText:@"Detecting…"
+                       size:13
+                      color:UIColor.whiteColor
+                     weight:UIFontWeightMedium];
+
     self.buildLabel.adjustsFontSizeToFitWidth = YES;
     self.buildLabel.minimumScaleFactor = 0.7;
     [buildColumn addArrangedSubview:self.buildLabel];
@@ -358,14 +404,17 @@
         [stack.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-19]
     ]];
 
-    [stack addArrangedSubview:[self sectionHeading:@"✓" title:@"Compatibility"]];
+    [stack addArrangedSubview:
+        [self sectionHeading:@"✓" title:@"Compatibility"]];
 
     UIView *inner = [[UIView alloc] init];
     inner.translatesAutoresizingMaskIntoConstraints = NO;
-    inner.backgroundColor = [UIColor colorWithRed:0.025 green:0.15 blue:0.12 alpha:1];
+    inner.backgroundColor =
+        [UIColor colorWithRed:0.025 green:0.15 blue:0.12 alpha:1];
     inner.layer.cornerRadius = 15;
     inner.layer.borderWidth = 1;
-    inner.layer.borderColor = [UIColor colorWithRed:0.10 green:0.65 blue:0.45 alpha:0.8].CGColor;
+    inner.layer.borderColor =
+        [UIColor colorWithRed:0.10 green:0.65 blue:0.45 alpha:0.8].CGColor;
 
     [stack addArrangedSubview:inner];
 
@@ -374,18 +423,21 @@
                                    color:[self greenColor]
                                   weight:UIFontWeightBold];
 
-    self.compatibilityLabel = [self labelWithText:@"Checking operating system…"
-                                             size:14
-                                            color:UIColor.whiteColor
-                                           weight:UIFontWeightSemibold];
+    self.compatibilityLabel =
+        [self labelWithText:@"Checking operating system…"
+                       size:14
+                      color:UIColor.whiteColor
+                     weight:UIFontWeightSemibold];
 
-    UILabel *note = [self labelWithText:@"OS compatibility does not mean a working jailbreak is available."
-                                   size:11
-                                  color:[self mutedColor]
-                                 weight:UIFontWeightRegular];
+    UILabel *note =
+        [self labelWithText:@"OS compatibility does not mean a working jailbreak is available."
+                       size:11
+                      color:[self mutedColor]
+                     weight:UIFontWeightRegular];
 
     UIStackView *innerStack = [self verticalStackWithSpacing:8];
     [inner addSubview:innerStack];
+
     [innerStack addArrangedSubview:range];
     [innerStack addArrangedSubview:self.compatibilityLabel];
     [innerStack addArrangedSubview:note];
@@ -415,7 +467,8 @@
         [stack.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-19]
     ]];
 
-    [stack addArrangedSubview:[self sectionHeading:@"∿" title:@"System status"]];
+    [stack addArrangedSubview:
+        [self sectionHeading:@"∿" title:@"System status"]];
 
     UIStackView *statusRow = [[UIStackView alloc] init];
     statusRow.translatesAutoresizingMaskIntoConstraints = NO;
@@ -425,7 +478,8 @@
 
     UIView *indicator = [[UIView alloc] init];
     indicator.translatesAutoresizingMaskIntoConstraints = NO;
-    indicator.backgroundColor = [UIColor colorWithRed:0.18 green:0.12 blue:0.35 alpha:1];
+    indicator.backgroundColor =
+        [UIColor colorWithRed:0.18 green:0.12 blue:0.35 alpha:1];
     indicator.layer.cornerRadius = 22;
     indicator.layer.borderWidth = 2;
     indicator.layer.borderColor = [self purpleColor].CGColor;
@@ -439,6 +493,7 @@
                                   size:17
                                  color:[self greenColor]
                                 weight:UIFontWeightBold];
+
     dot.textAlignment = NSTextAlignmentCenter;
     [indicator addSubview:dot];
 
@@ -454,10 +509,11 @@
                                    color:UIColor.whiteColor
                                   weight:UIFontWeightBold];
 
-    self.statusLabel = [self labelWithText:@"No exploit backend is integrated."
-                                       size:12
-                                      color:[self mutedColor]
-                                     weight:UIFontWeightRegular];
+    self.statusLabel =
+        [self labelWithText:@"No exploit backend is integrated."
+                       size:12
+                      color:[self mutedColor]
+                     weight:UIFontWeightRegular];
 
     [statusText addArrangedSubview:ready];
     [statusText addArrangedSubview:self.statusLabel];
@@ -485,12 +541,22 @@
         [UIColor colorWithRed:0.68 green:0.48 blue:1 alpha:1].CGColor;
     self.patchButton.clipsToBounds = YES;
 
-    [self.patchButton setTitle:@"  ↯   PatchMe   ›" forState:UIControlStateNormal];
-    [self.patchButton setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
-    self.patchButton.titleLabel.font = [UIFont systemFontOfSize:23 weight:UIFontWeightHeavy];
+    [self.patchButton setTitle:@"  ↯   PatchMe   ›"
+                      forState:UIControlStateNormal];
+
+    [self.patchButton setTitleColor:UIColor.whiteColor
+                           forState:UIControlStateNormal];
+
+    self.patchButton.titleLabel.font =
+        [UIFont systemFontOfSize:23 weight:UIFontWeightHeavy];
+
     self.patchButton.titleLabel.adjustsFontSizeToFitWidth = YES;
     self.patchButton.titleLabel.minimumScaleFactor = 0.75;
-    self.patchButton.contentEdgeInsets = UIEdgeInsetsMake(20, 15, 20, 15);
+
+    // Use the configuration-independent content layout instead of the
+    // deprecated contentEdgeInsets property.
+    self.patchButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+    self.patchButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
 
     [self.patchButton addTarget:self
                          action:@selector(patchTapped)
@@ -552,11 +618,13 @@
                       color:[self mutedColor]
                      weight:UIFontWeightBold]];
 
-    UILabel *aboutText = [self labelWithText:
-        @"hurr1c4ne is an iOS research project. A compatible backend is required for any patching functionality."
-                                      size:12
-                                     color:UIColor.whiteColor
-                                    weight:UIFontWeightRegular];
+    UILabel *aboutText =
+        [self labelWithText:
+            @"hurr1c4ne is an iOS research project. A compatible backend is required for any patching functionality."
+                       size:12
+                      color:UIColor.whiteColor
+                     weight:UIFontWeightRegular];
+
     [aboutStack addArrangedSubview:aboutText];
 
     [noticeStack addArrangedSubview:
@@ -565,11 +633,13 @@
                       color:[self mutedColor]
                      weight:UIFontWeightBold]];
 
-    UILabel *noticeText = [self labelWithText:
-        @"Research scaffold only.\nNo jailbreak capability is implied.\nUse at your own risk."
-                                       size:12
-                                      color:UIColor.whiteColor
-                                     weight:UIFontWeightRegular];
+    UILabel *noticeText =
+        [self labelWithText:
+            @"Research scaffold only.\nNo jailbreak capability is implied.\nUse at your own risk."
+                       size:12
+                      color:UIColor.whiteColor
+                     weight:UIFontWeightRegular];
+
     [noticeStack addArrangedSubview:noticeText];
 
     [row addArrangedSubview:about];
@@ -581,10 +651,12 @@
 #pragma mark - Footer
 
 - (UIView *)buildFooter {
-    UILabel *footer = [self labelWithText:@"hurr1c4ne  •  RESEARCH BUILD  •  v0.1.0"
-                                     size:10
-                                    color:[self mutedColor]
-                                   weight:UIFontWeightMedium];
+    UILabel *footer =
+        [self labelWithText:@"hurr1c4ne  •  RESEARCH BUILD  •  v0.1.0"
+                       size:10
+                      color:[self mutedColor]
+                     weight:UIFontWeightMedium];
+
     footer.textAlignment = NSTextAlignmentCenter;
     return footer;
 }
@@ -594,7 +666,8 @@
 - (UIView *)buildBottomBar {
     UIView *bar = [[UIView alloc] init];
     bar.translatesAutoresizingMaskIntoConstraints = NO;
-    bar.backgroundColor = [UIColor colorWithRed:0.025 green:0.035 blue:0.065 alpha:0.98];
+    bar.backgroundColor =
+        [UIColor colorWithRed:0.025 green:0.035 blue:0.065 alpha:0.98];
     bar.layer.borderWidth = 1;
     bar.layer.borderColor = [UIColor colorWithWhite:1 alpha:0.07].CGColor;
 
@@ -611,12 +684,15 @@
         UIStackView *tab = [self verticalStackWithSpacing:3];
         tab.alignment = UIStackViewAlignmentCenter;
 
-        UIColor *color = (i == 0) ? [self greenColor] : [self mutedColor];
+        UIColor *color = (i == 0)
+            ? [self greenColor]
+            : [self mutedColor];
 
         UILabel *icon = [self labelWithText:symbols[i]
                                        size:23
                                       color:color
                                      weight:UIFontWeightSemibold];
+
         UILabel *title = [self labelWithText:titles[i]
                                         size:10
                                        color:color
@@ -660,7 +736,8 @@
     self.osVersionLabel.text = osVersion;
     self.buildLabel.text = build;
 
-    NSString *summary = [CompatibilityChecker summaryForOSVersion:osVersion];
+    NSString *summary =
+        [CompatibilityChecker summaryForOSVersion:osVersion];
 
     self.compatibilityLabel.text = summary.length
         ? summary
@@ -675,16 +752,17 @@
 
     self.statusLabel.text = @"Evaluating available capabilities…";
 
-    [[PatchManager sharedManager] evaluateWithCompletion:^(NSString *message) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.statusLabel.text = message.length
-                ? message
-                : @"No additional capabilities reported.";
+    [[PatchManager sharedManager]
+        evaluateWithCompletion:^(NSString *message) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.statusLabel.text = message.length
+                    ? message
+                    : @"No additional capabilities reported.";
 
-            self.patchButton.enabled = YES;
-            self.patchButton.alpha = 1.0;
-        });
-    }];
+                self.patchButton.enabled = YES;
+                self.patchButton.alpha = 1.0;
+            });
+        }];
 }
 
 @end
