@@ -1,0 +1,30 @@
+name: hurr1c4ne
+
+options:
+  bundleIdPrefix: com.hurr1c4ne
+  deploymentTarget:
+    iOS: "15.0"
+
+targets:
+  hurr1c4ne:
+    type: application
+    platform: iOS
+
+    sources:
+      - path: hurr1c4ne
+        excludes:
+          - Info.plist
+
+    info:
+      path: hurr1c4ne/Info.plist
+
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hurr1c4ne.app
+        PRODUCT_NAME: hurr1c4ne
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SDKROOT: iphoneos
+        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+        SWIFT_VERSION: ""
