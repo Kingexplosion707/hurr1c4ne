@@ -44,31 +44,45 @@ jobs:
           APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/hurr1c4ne.app"
           PLIST="$APP_PATH/Info.plist"
 
-          if [ ! -d "$APP_PATH" ]; then
+          test -d "$APP_PATH" || {
             echo "::error::Built app not found"
             exit 1
-          fi
+          }
 
-          if [ ! -f "$PLIST" ]; then
+          test -f "$PLIST" || {
             echo "::error::Built Info.plist not found"
             exit 1
-          fi
+          }
 
-          echo "=== App identity ==="
+          echo "=== Bundle identifier ==="
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleSupportedPlatforms" "$PLIST"
 
-          echo "=== Launch screen ==="
-          /usr/libexec/PlistBuddy -c "Print :UILaunchScreen" "$PLIST" || true
+          echo "=== Launch storyboard ==="
+          LAUNCH_SCREEN=$(/usr/libexec/PlistBuddy \
+            -c "Print :UILaunchStoryboardName" "$PLIST")
+
+          echo "Configured launch screen: $LAUNCH_SCREEN"
+
+          test -f "$APP_PATH/$LAUNCH_SCREEN.storyboardc/Info.plist" || {
+            echo "::error::Compiled launch storyboard is missing: $LAUNCH_SCREEN.storyboardc"
+            echo "=== App contents ==="
+            find "$APP_PATH" -maxdepth 3 -print
+            exit 1
+          }
 
           echo "=== Full-screen setting ==="
-          /usr/libexec/PlistBuddy -c "Print :UIRequiresFullScreen" "$PLIST" || true
-
-          echo "=== Supported orientations ==="
-          /usr/libexec/PlistBuddy -c "Print :UISupportedInterfaceOrientations" "$PLIST" || true
+          /usr/libexec/PlistBuddy \
+            -c "Print :UIRequiresFullScreen" "$PLIST"
 
           echo "=== Device family ==="
-          /usr/libexec/PlistBuddy -c "Print :UIDeviceFamily" "$PLIST" || true
+          /usr/libexec/PlistBuddy \
+            -c "Print :UIDeviceFamily" "$PLIST"
+
+          echo "=== Supported orientations ==="
+          /usr/libexec/PlistBuddy \
+            -c "Print :UISupportedInterfaceOrientations" "$PLIST"
+
+          echo "=== Launch screen verified ==="
 
       - name: Package IPA
         run: |
@@ -88,10 +102,14 @@ jobs:
           /usr/bin/ditto -c -k --sequesterRsrc --keepParent \
             Payload "$IPA_PATH"
 
-          echo "=== IPA contents ==="
-          /usr/bin/unzip -l "$IPA_PATH"
+          echo "=== Verify packaged IPA ==="
+          /usr/bin/unzip -Z1 "$IPA_PATH" \
+            | grep -q '^Payload/hurr1c4ne.app/Info.plist$'
 
-          /usr/bin/unzip -Z1 "$IPA_PATH" | grep -q '^Payload/hurr1c4ne.app/Info.plist$'
+          /usr/bin/unzip -Z1 "$IPA_PATH" \
+            | grep -q '^Payload/hurr1c4ne.app/LaunchScreen.storyboardc/'
+
+          echo "IPA packaged and verified successfully."
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
